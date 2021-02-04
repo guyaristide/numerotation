@@ -48,36 +48,37 @@ class _LoginActivityState extends State<LoginActivity> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
-          width: size.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height / 4,
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage("res/images/human_evolution.gif"),
-                          fit: BoxFit.cover,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: MediaQuery.of(context).size.height / 4,
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage("res/images/human_evolution.gif"),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black87.withOpacity(0.0001),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black87.withOpacity(0.0001),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Divider(
-                height: 1,
-              ),
-              Expanded(
-                child: Column(
+                Divider(
+                  height: 1,
+                ),
+                Column(
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -105,38 +106,36 @@ class _LoginActivityState extends State<LoginActivity> {
                         ],
                       ),
                     ),
-                    Expanded(
-                      child: Container(
-                        child: step == 1
-                            ? IdentityStepWidget(
-                                scaffoldKey: _scaffoldKey,
-                                theme: theme,
-                                ctr_userName: ctr_userName,
-                                userNameChange: (value) {
-                                  setState(() {
-                                    userContactName = value;
-                                    step = 2;
-                                  });
-                                },
-                              )
-                            : PhonesStepWidget(
-                                userPhoneChange: (value) {
-                                  setState(() {
-                                    userPhone = value;
-                                  });
+                    Container(
+                      child: step == 1
+                          ? IdentityStepWidget(
+                              scaffoldKey: _scaffoldKey,
+                              theme: theme,
+                              ctr_userName: ctr_userName,
+                              userNameChange: (value) {
+                                setState(() {
+                                  userContactName = value;
+                                  step = 2;
+                                });
+                              },
+                            )
+                          : PhonesStepWidget(
+                              userPhoneChange: (value) {
+                                setState(() {
+                                  userPhone = value;
+                                });
 
-                                  Navigator.of(context).pushReplacementNamed(
-                                      RouterGenerator.home);
-                                },
-                                scaffoldKey: _scaffoldKey,
-                                name: userContactName,
-                                theme: theme),
-                      ),
+                                Navigator.of(context).pushReplacementNamed(
+                                    RouterGenerator.home);
+                              },
+                              scaffoldKey: _scaffoldKey,
+                              name: userContactName,
+                              theme: theme),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

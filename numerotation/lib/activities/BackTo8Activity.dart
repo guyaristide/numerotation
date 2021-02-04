@@ -141,7 +141,7 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                 ],
                 color: Colors.white,
               ),
-              height: size.height / 5,
+              height: size.height / 4.6,
               padding: EdgeInsets.all(10),
               child: Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
@@ -441,12 +441,14 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                                                                   ),
                                                                   Row(
                                                                     children: [
-                                                                      Text(
-                                                                        "${phoneIv}",
-                                                                        softWrap:
-                                                                            false,
-                                                                        overflow:
-                                                                            TextOverflow.fade,
+                                                                      Expanded(
+                                                                        child: Text(
+                                                                          "${phoneIv}",
+                                                                          softWrap:
+                                                                              false,
+                                                                          overflow:
+                                                                              TextOverflow.fade,
+                                                                        ),
                                                                       ),
                                                                     ],
                                                                   ),
@@ -565,78 +567,80 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                                   //.withOpacity(0.2),
                                   contentPadding: EdgeInsets.all(0.0),
                                   content: Container(
-                                    height: size.height * 0.30,
+                                    height: size.height * 0.40,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(20.0),
                                     ),
                                     //padding: EdgeInsets.all(10.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          width: size.width,
-                                          padding: EdgeInsets.all(20),
-                                          decoration: BoxDecoration(
-                                            color: Colors.red.withOpacity(0.1),
-                                            borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(20.0),
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(
+                                            width: size.width,
+                                            padding: EdgeInsets.all(20),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red.withOpacity(0.1),
+                                              borderRadius: BorderRadius.vertical(
+                                                top: Radius.circular(20.0),
+                                              ),
                                             ),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              "Attention !!",
-                                              style: theme.textTheme.headline4
-                                                  .copyWith(
-                                                color: Colors.red[900],
+                                            child: Center(
+                                              child: Text(
+                                                "Attention !!",
+                                                style: theme.textTheme.headline4
+                                                    .copyWith(
+                                                  color: Colors.red[900],
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.all(20),
-                                          child: Center(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                    "Si vous décidez de continuer vos contacts sélectionnés vont être remplacés par leurs nouveaux formats."),
-                                              ],
+                                          Container(
+                                            padding: EdgeInsets.all(20),
+                                            child: Center(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                      "Si vous décidez de continuer vos contacts sélectionnés vont être remplacés par leurs nouveaux formats."),
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            FlatButton(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              FlatButton(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                                child: Text("Annuler"),
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(false);
+                                                },
                                               ),
-                                              child: Text("Annuler"),
-                                              onPressed: () {
-                                                Navigator.of(context)
-                                                    .pop(false);
-                                              },
-                                            ),
-                                            FlatButton(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              child: Text("Continuer"),
-                                              onPressed: () {
-                                                Navigator.of(context).pop(true);
-                                              },
-                                            )
-                                          ],
-                                        ),
-                                      ],
+                                              FlatButton(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                                child: Text("Continuer"),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(true);
+                                                },
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
@@ -652,96 +656,43 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                               });
                               //await Backup.writeContact(_contacts);
                               setState(() {
-                                textLoading = "Conversion";
+                                textLoading = "Conversion en cours ...";
                               });
-
+                              List<Contact> bloc = new List();
                               for (Contact c in _contacts) {
-                                setState(() {
-                                  textLoading =
-                                      "${c.compositeName ?? c.nameData.firstName ?? c.nameData.middleName ?? c.nameData.surname ?? c.nickName ?? ''}";
-                                });
 
-                                //check valid identifier
-                                /*checkId:
-                                {
-                                  try {
-                                    final contact =
-                                        await flC.Contacts.getContact(
-                                            c.identifier);
-                                    if (contact != null &&
-                                        contact.unifiedContactId ==
-                                            c.identifier &&
-                                        c.middleName == contact.middleName &&
-                                        c.familyName == contact.familyName &&
-                                        c.givenName == contact.givenName) {
-                                      //print(
-                                          "------> OK :::::::> ${contact.displayName ?? contact.familyName ?? contact.givenName ?? contact.middleName}");
-                                      //print(contact.toString());
-                                      //print(contact.middleName);
-                                      //print(contact.familyName);
-                                      //print(contact.givenName);
-                                      //print(contact.displayName);
-                                      //print(contact.unifiedContactId);
-                                      //print(contact.singleContactId);
-                                      //print(contact.identifier);
-                                      break checkId;
-                                    } else {
-                                      //print("BAD ID ${c.identifier}");
-                                      await contactWarning(c, size, theme);
-                                      continue;
-                                    }
-                                  } catch (e) {
-                                    //print("BAD ID (catch ex) ${c.identifier}");
-                                    await contactWarning(c, size, theme);
-                                    continue;
-                                  }
-                                }*/
-                                List<PhoneNumber> items = new List();
-                                for (PhoneNumber i in c.phoneList) {
+
+                                c.phoneList = c.phoneList.map((i){
                                   bool isNewPhoneNumber =
-                                      PhoneUtils.isIvorianNewPhone(i.mainData);
+                                  PhoneUtils.isIvorianNewPhone(i.mainData);
                                   //print("${i.mainData} --> $isNewPhoneNumber");
                                   if (isNewPhoneNumber) {
                                     /*setState(() {
                                       textLoading = "reverse ${i.mainData}";
                                     });*/
                                     String normalizePhoneNumber =
-                                        PhoneUtils.normalizeNumber(i.mainData);
+                                    PhoneUtils.normalizeNumber(i.mainData);
                                     String newPhone = PhoneUtils.reverse(
                                         normalizePhoneNumber);
                                     i.mainData = newPhone;
                                     //print(  "$normalizePhoneNumber --> $newPhone");
                                   }
-
-                                  //phone.value.contains("\u202c") &&
-                                  //                         !phone.value.contains("\u202A")
-                                  /*if (!items.any((it) =>
-                                      it.mainData
-                                          .replaceAll("\u202c", "")
-                                          .replaceAll("\u202A", "")
-                                          .replaceAll(" ", "")
-                                          .trim() ==
-                                      i.mainData
-                                          .replaceAll("\u202c", "")
-                                          .replaceAll("\u202A", "")
-                                          .replaceAll(" ", "")
-                                          .trim()))*/
-                                  items.add(i);
-                                }
-                                c.phoneList = [];
-                                c.phoneList = items;
+                                  return i;
+                                }).toList();
                                 //await ContactsService.deleteContact(c);
-                                await ContactEditor.updateContact(c,
-                                    replaceOld: true);
+                                bloc.add(c);
                               }
+                              await ContactEditor.updateContactsAsync(bloc,
+                                  replaceOld: true).then((res){
 
-                              setState(() {
-                                processing = false;
-                              });
+                              }).whenComplete(() async {
+                                setState(() {
+                                  processing = false;
+                                });
 
-                              await showDialog(
-                                context: context,
-                                builder: (_) {
+                                await showDialog(
+                                    context: context,
+                                    builder: (_) {
                                   return AlertDialog(
                                     backgroundColor: Colors.transparent,
                                     //.withOpacity(0.2),
@@ -751,21 +702,21 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius:
-                                            BorderRadius.circular(20.0),
+                                        BorderRadius.circular(20.0),
                                       ),
                                       //padding: EdgeInsets.all(10.0),
                                       child: Column(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                         children: [
                                           Container(
                                             width: size.width,
                                             padding: EdgeInsets.all(20),
                                             decoration: BoxDecoration(
                                               color:
-                                                  Colors.green.withOpacity(0.1),
+                                              Colors.green.withOpacity(0.1),
                                               borderRadius:
-                                                  BorderRadius.vertical(
+                                              BorderRadius.vertical(
                                                 top: Radius.circular(20.0),
                                               ),
                                             ),
@@ -784,9 +735,9 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                                             child: Center(
                                               child: Column(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                                MainAxisAlignment.center,
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
+                                                CrossAxisAlignment.center,
                                                 children: [
                                                   Text(
                                                       "Vos contacts ont été remis à 8 chiffres"),
@@ -796,12 +747,12 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                            MainAxisAlignment.center,
                                             children: [
                                               FlatButton(
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(20),
+                                                  BorderRadius.circular(20),
                                                 ),
                                                 child: Text("Ok"),
                                                 onPressed: () {
@@ -816,8 +767,10 @@ class _BackTo8ActivityState extends State<BackTo8Activity> {
                                     ),
                                   );
                                 },
-                              );
-                              Navigator.of(context).pop(true);
+                                );
+                                Navigator.of(context).pop(true);
+                              });
+
                             }
                           }
                         : null,

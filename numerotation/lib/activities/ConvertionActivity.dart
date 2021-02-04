@@ -6,14 +6,15 @@ import 'package:numerotation/core/utils/Backup.dart';
 import 'package:numerotation/core/utils/PhoneUtils.dart';
 import 'package:numerotation/core/utils/theme.dart';
 import 'package:numerotation/shared/AppTitleWidget.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 //import 'package:flutter_contact/contacts.dart' as flC;
 import 'package:url_launcher/url_launcher.dart';
 
 class ConvertionActivity extends StatefulWidget {
-  final List<Contact> contacts;
+  final List<Contact> scontacts;
 
-  const ConvertionActivity(this.contacts, {Key key}) : super(key: key);
+  const ConvertionActivity(this.scontacts, {Key key}) : super(key: key);
 
   @override
   _ConvertionActivityState createState() => _ConvertionActivityState();
@@ -22,6 +23,7 @@ class ConvertionActivity extends StatefulWidget {
 class _ConvertionActivityState extends State<ConvertionActivity> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   List<Contact> _warningContact = [];
+  List<Contact> selectedContacts = [];
 
   TextEditingController _ctrlSearch = new TextEditingController();
 
@@ -63,7 +65,7 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
                 ],
                 color: Colors.white,
               ),
-              height: size.height / 5,
+              height: size.height / 4.6,
               padding: EdgeInsets.all(10),
               child: Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
@@ -89,7 +91,7 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "${widget.contacts != null ? widget.contacts.length : "Aucun"} Contacts selectionnés",
+                            "${widget.scontacts != null ? widget.scontacts.length : "Aucun"} Contacts selectionnés",
                             style:
                                 Theme.of(context).textTheme.headline4.copyWith(
                                       fontSize: 22,
@@ -122,13 +124,13 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
               ),
             ),
             Expanded(
-              child: widget.contacts != null && !processing
+              child: widget.scontacts != null && !processing
                   //Build a list view of all contacts, displaying their avatar and
                   // display name
                   ? ListView.builder(
-                      itemCount: widget.contacts?.length ?? 0,
+                      itemCount: widget.scontacts?.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
-                        Contact contact = widget.contacts?.elementAt(index);
+                        Contact contact = widget.scontacts?.elementAt(index);
                         return buildItemInkWell(contact);
                       },
                     )
@@ -140,7 +142,7 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
         ),
       ),
       bottomNavigationBar: Visibility(
-        visible: !widget.contacts.every(
+        visible: !widget.scontacts.every(
             (e) => e.phoneList.every((p) => PhoneUtils.isNewPhone(p.mainData))),
         child: BottomAppBar(
           child: Container(
@@ -320,78 +322,120 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
 
   Future ConvertProcess(
       BuildContext context, Size size, ThemeData theme) async {
-    var result = await showModalBottomSheet(
+    int result = await showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(40),
+      builder: (_) {
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          //.withOpacity(0.2),
+          contentPadding: EdgeInsets.all(0.0),
+          content: Container(
+            height: size.height * 0.61,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.0),
             ),
-            color: Colors.white,
-          ),
-          height: MediaQuery.of(context).size.height * 0.31,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20.0),
+            //padding: EdgeInsets.all(10.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: size.width,
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20.0),
+                      ),
                     ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Comment voulez-vous enrégistrer les contacts ",
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
+                    child: Center(
+                      child: Text(
+                        "Attention !!",
+                        style: theme.textTheme.headline4.copyWith(
+                          color: Colors.red[900],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                ListTile(
-                  title: Text(
-                    "Garder une copies des anciens numéros",
-                    style: TextStyle(
-                      color: primaryColor,
+                  Container(
+                    padding: EdgeInsets.all(20),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          /*Text(
+                                                      "Attention la conversion de contact en masse comporte des risque il es préferable de convertir vos contact singulièrement ")*/
+                          Text(
+                              "Si vous décidez de continuer à convertir vos contacts sélectionnés vont être remplacés par leurs nouveaux formats.\n Vous pouvez conserver une copie des contacts pour toujours les voir dans vos applications de messagerie (WhatsApps , Viber, ...)."),
+                        ],
+                      ),
                     ),
                   ),
-                  onTap: () {
-                    Navigator.of(context).pop(0);
-                    //convertSave(context, size, theme, replaceOld: false);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    "Remplacer les anciens numéros",
-                    style: TextStyle(
-                      color: primaryColor,
-                    ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      /*FlatButton(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                                child: Text("Annuler"),
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(false);
+                                                },
+                                              ),*/
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: FlatButton(
+                          color: Colors.blueGrey,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text("Continuer",
+                              style: TextStyle(color: Colors.white)),
+                          onPressed: () {
+                            Navigator.of(context).pop(1);
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: FlatButton(
+                          color: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            "Conservez une copie",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop(0);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                  onTap: () {
-                    Navigator.of(context).pop(1);
-                    //convertSave(context, size, theme, replaceOld: true);
-                  },
-                )
-              ],
+                ],
+              ),
             ),
           ),
         );
       },
-    ).then((value) {
-      //print(value);
-      if (value != null && value is int) {
-        convertSave(context, size, theme, replaceOld: value == 1);
-      }
-    });
+    );
 
     if (result != null && result is int) {
+      print("if statment");
+      convertSave(context, size, theme, replaceOld: result == 1)
+          .whenComplete(() {
+        debugPrint("if whenComplete");
+        Navigator.of(context).pop(true);
+      });
       //convertSave(context, size, theme, replaceOld: result == 1);
     }
   }
@@ -403,124 +447,55 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
 
       textLoading = "Sauvegarde des contacts à convertir";
 
-      textLoading = "Conversion";
+      textLoading = "Conversion ...";
     });
 
-    for (Contact c in widget.contacts) {
-      setState(() {
-        textLoading =
-            "${c.compositeName ?? c.nameData.firstName ?? c.nameData.middleName ?? c.nameData.surname ?? c.nickName ?? ''}";
+    // manage Bloc
+
+    // split bloc
+
+
+    int cursor = 0;
+    int perPage = selectedContacts.length;
+    int length = selectedContacts.length;
+    int totalPage = (length / perPage).ceil();
+
+    /*debugPrint("totalPage ${selectedContacts.length}");
+    debugPrint("totalPage $totalPage");
+
+    while (cursor < totalPage) {
+      int start = (cursor * perPage);
+      debugPrint("start ${start}");
+
+      int endCursor = ((cursor + 1) * perPage);
+
+      int end = endCursor >= length ? length : endCursor;
+      debugPrint("end ${end}");
+
+
+      List<Contact> subList = selectedContacts.sublist(start, end);
+
+      await processSubList(subList, replaceOld).then((value){
+
+      }).whenComplete(() {
+
       });
-      //check valid identifier
-      /*checkId:
-              {
-                try {
-                  final contact =
-                      await flC.Contacts.getContact(
-                          c.identifier);
-                  if (contact != null) {
-                    print(
-                        "--------------------------------------------------------------------------");
-                    print(
-                        "| RT identifier: ${contact.unifiedContactId} VS  ${c.identifier}  |");
-                    print(
-                        "| RT middleName: ${contact.middleName} VS  ${c.middleName}  |");
-                    print(
-                        "| RT familyName: ${contact.familyName} VS  ${c.familyName}  |");
-                    print(
-                        "| RT givenName: ${contact.givenName} VS  ${c.givenName}  |");
-                    print(
-                        "| RT phones length: ${contact.phones.length} VS  ${c.phones.length}  |");
-                    print(
-                        "| RT phones: ${contact.phones.map((e) => "${e.label}:${e.value}").join(",")} VS  ${c.phones.map((e) => "${e.label}:${e.value}").join(",")}  |");
-                    print(
-                        "--------------------------------------------------------------------------");
-                  }
-                  if (contact != null &&
-                      contact.unifiedContactId ==
-                          c.identifier &&
-                      c.phones.length ==
-                          contact.phones.length &&
-                      c.phones.every((cPh) => contact.phones
-                          .any((ctPh) =>
-                              (cPh.value == ctPh.value) &&
-                              (cPh.label == ctPh.label)))) {
-                    print(
-                        "------> OK :::::::> ${contact.displayName ?? contact.familyName ?? contact.givenName ?? contact.middleName}");
-                    print(contact.toString());
-                    print(contact.middleName);
-                    print(contact.familyName);
-                    print(contact.givenName);
-                    print(contact.displayName);
-                    print(contact.unifiedContactId);
-                    print(contact.singleContactId);
-                    print(contact.identifier);
-                    break checkId;
-                  } else {
-                    print("BAD ID ${c.identifier}");
-                    await contactWarning(c, size, theme);
-                    continue;
-                  }
-                } catch (e) {
-                  print("BAD ID (catch ex) ${c.identifier}");
-                  await contactWarning(c, size, theme);
-                  continue;
-                }
-              }*/
 
-      List<PhoneNumber> items = new List();
-      for (PhoneNumber i in c.phoneList) {
-        //print(i.mainData);
-        String normalizePhoneNumber = PhoneUtils.normalizeNumber(i.mainData);
-        bool isValideOldNumber =
-            PhoneUtils.validateNormalizeOldPhoneNumber(normalizePhoneNumber);
-        if (isValideOldNumber) {
-          String newPhone = PhoneUtils.convert(normalizePhoneNumber);
-          i.mainData = newPhone;
-        }
-        /*if (!items.any((it) =>
-                    it.mainData
-                        .replaceAll("(", "")
-                        .replaceAll("-", "")
-                        .replaceAll(")", "")
-                        .replaceAll("\u202c", "")
-                        .replaceAll("\u202A", "")
-                        .replaceAll(" ", "")
-                        .trim() ==
-                    i.mainData
-                        .replaceAll("(", "")
-                        .replaceAll(")", "")
-                        .replaceAll("-", "")
-                        .replaceAll("\u202c", "")
-                        .replaceAll("\u202A", "")
-                        .replaceAll(" ", "")
-                        .trim())) items.add(i);
-              }*/
-        items.add(i);
-        //await ContactsService.deleteContact(c);
+      cursor++;
+    }*/
 
-        //verifi identifier
 
-        //dynamic result = await ContactEditor.updateContact(c);
-        //print(result.toString());
+    await processSubList(selectedContacts, replaceOld).then((value){
 
-      }
+    }).whenComplete(() async {
 
-      c.phoneList = [];
-      c.phoneList = items;
-      try {
-        dynamic result =
-            await ContactEditor.updateContact(c, replaceOld: replaceOld);
-        //print(result.toString());
-      } catch (ex) {}
-    }
-    setState(() {
-      processing = false;
-    });
+      setState(() {
+        processing = false;
+      });
 
-    await showDialog(
-      context: context,
-      builder: (_) {
+      await showDialog(
+          context: context,
+          builder: (_) {
         return AlertDialog(
           backgroundColor: Colors.transparent,
           //.withOpacity(0.2),
@@ -584,9 +559,50 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
           ),
         );
       },
-    );
-    Navigator.of(context).pop(true);
+      );
+    });
   }
+
+  Future<bool> processSubList(List<Contact> subList, replaceOld) async {
+    List<Contact> bloc = new List();
+    for (Contact c in subList) {
+
+      /*setState(() {
+        textLoading =
+        "${c.compositeName ?? c.nameData.firstName ?? c.nameData.middleName ?? c.nameData.surname ?? c.nickName ?? ''}";
+      });*/
+      c.phoneList = c.phoneList.map((e) {
+        //replaceOld
+        String normalizePhoneNumber = PhoneUtils.normalizeNumber(e.mainData);
+
+        bool isValideOldNumber =
+        PhoneUtils.validateNormalizeOldPhoneNumber(normalizePhoneNumber);
+        if (isValideOldNumber) {
+          String newPhone = PhoneUtils.convert(normalizePhoneNumber);
+          e.mainData = newPhone;
+        }
+
+        return e;
+      }).toList();
+      //c.phoneList = [];
+      //c.phoneList = items;
+      bloc.add(c);
+    }
+
+    try {
+
+      return ContactEditor.updateContactsAsync(bloc, replaceOld: replaceOld);
+
+    } catch (ex) {
+      debugPrint("----------------------------------------------");
+      debugPrint(ex.toString());
+
+      debugPrint("----------------------------------------------");
+      return false;
+    }
+  }
+
+  List<Contact> paginate(int pageNumber) {}
 
   contactWarning(Contact c, Size size, ThemeData theme) async {
     _warningContact.add(c);
@@ -869,24 +885,39 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
                                                       Text("+225"),
                                                       if (PhoneUtils.isNewPhone(
                                                           normalizePhoneNumber))
-                                                        Text(
-                                                            "${normalizePhoneNumber}"),
+                                                        Flexible(
+                                                          fit: FlexFit.loose,
+                                                          child: Text(
+                                                            "${normalizePhoneNumber}",
+                                                            softWrap: false,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .fade,
+                                                          ),
+                                                        ),
                                                       if (!PhoneUtils.isNewPhone(
                                                               normalizePhoneNumber) &&
                                                           operator != null)
-                                                        Text(
-                                                          "${operator["new_initial"]}",
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 16,
-                                                              color: operator !=
-                                                                      null
-                                                                  ? operator[
-                                                                      "operator_color"]
-                                                                  : Colors
-                                                                      .black87),
+                                                        Flexible(
+                                                          fit: FlexFit.loose,
+                                                          child: Text(
+                                                            "${operator["new_initial"]}",
+                                                            softWrap: false,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .fade,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 16,
+                                                                color: operator !=
+                                                                        null
+                                                                    ? operator[
+                                                                        "operator_color"]
+                                                                    : Colors
+                                                                        .black87),
+                                                          ),
                                                         ),
                                                       if (!PhoneUtils.isNewPhone(
                                                           normalizePhoneNumber))
@@ -931,5 +962,42 @@ class _ConvertionActivityState extends State<ConvertionActivity> {
     );
   }
 
-  void getAllContact() {}
+  Future<void> getContacts() async {
+    setState(() {
+      selectedContacts = [];
+      processing = true;
+    });
+
+    if (await Permission.contacts.request().isGranted) {
+      //We already have permissions for contact when we get to this page, so we
+      // are now just retrieving it
+      List<Contact> contactsAll = await ContactEditor.getContacts;
+      Iterable<Contact> contacts = contactsAll;
+      if (contacts.isNotEmpty) {
+        contacts = contacts
+            .where((element) => widget.scontacts
+                .map((e) => e.contactId)
+                .toList()
+                .contains(element.contactId))
+            .toList();
+      }
+      debugPrint("------------------- ");
+      setState(() {
+        selectedContacts = List<Contact>.from(contacts);
+        processing = false;
+      });
+      selectedContacts.forEach((e) {
+        debugPrint(
+            " selectedContacts  :: e.phoneList.length ${e.phoneList.length}");
+
+        e.phoneList.forEach((element) {
+          debugPrint("element ${element.mainData}");
+        });
+      });
+    }
+  }
+
+  void getAllContact() {
+    getContacts();
+  }
 }
