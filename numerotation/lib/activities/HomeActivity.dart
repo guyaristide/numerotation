@@ -51,7 +51,7 @@ class _HomeActivityState extends State<HomeActivity> with RouteAware {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   Iterable<Contact> _contacts;
-  Iterable<Contact> _contactsAll;
+  List<Contact> _contactsAll;
   Iterable<Contact> allcontactsAll;
 
   TextEditingController _ctrlSearch = new TextEditingController();
@@ -76,6 +76,9 @@ class _HomeActivityState extends State<HomeActivity> with RouteAware {
       _contactsAll = [];
       allcontactsAll = [];
     });
+
+
+
     if (await Permission.contacts.request().isGranted) {
       //We already have permissions for contact when we get to this page, so we
       // are now just retrieving it
@@ -90,7 +93,6 @@ class _HomeActivityState extends State<HomeActivity> with RouteAware {
               return element.phoneList.any((p) {
                 if (PhoneUtils.isIvorianNewPhone(phone.mainData)) return true;
                 bool haveAlreadyAlreadyContactConvert = false;
-
                 haveAlreadyAlreadyContactConvert =
                     PhoneUtils.isIvorianNewPhone(p.mainData) &&
                         PhoneUtils.normalizeNumber(
@@ -102,13 +104,15 @@ class _HomeActivityState extends State<HomeActivity> with RouteAware {
             }));
       }
 
-      print("------------------- ");
-      // print(contacts.map((e) => e.identifier).length);
-      // print(contacts.map((e) => e.identifier).join("|")+" %%% ");
+      debugPrint("------------------- ");
       setState(() {
         _contacts = contacts;
-        _contactsAll = contacts;
+        _contactsAll  =List<Contact>.from(contacts);//.where((element) => true).toList();
         allcontactsAll = contactsAll;
+      });
+
+      _contactsAll.forEach((element) {
+        debugPrint("element.phoneList.length ${element.phoneList.length}");
       });
     }
   }
@@ -1050,6 +1054,12 @@ class _HomeActivityState extends State<HomeActivity> with RouteAware {
                             itemBuilder: (BuildContext context, int index) {
                               Contact contact = _contacts?.elementAt(index);
 
+                              contact.phoneList.forEach((element) {
+                                debugPrint(element.toMap().toString());
+                              });
+
+
+                              List<PhoneNumber> phonesInitial = contact.phoneList;
                               List<PhoneNumber> phones = contact.phoneList
                                   .fold(new List<PhoneNumber>(),
                                       (previousValue, element) {
@@ -1252,12 +1262,19 @@ class _HomeActivityState extends State<HomeActivity> with RouteAware {
           ),
           backgroundColor: primaryColor,
           onPressed: () {
+
+            List<Contact> selectedContacts = _contactsAll
+                .where(
+                    (element) => _selectedContact.contains(element.contactId))
+                .toList();
+
+            debugPrint('selectedContacts ${selectedContacts.length}');
+            selectedContacts.forEach((element) {
+              debugPrint('-----> element.phoneList.length : ${element.phoneList.length}');
+            });
             Navigator.of(context).pushNamed(
               RouterGenerator.convert,
-              arguments: _contacts
-                  .where(
-                      (element) => _selectedContact.contains(element.contactId))
-                  .toList(),
+              arguments: selectedContacts,
             );
           },
           icon: Icon(
